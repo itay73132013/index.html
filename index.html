@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chief of Staff - ניהול לוז ומשימות</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Assistant', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col w-full m-0 p-0">
+
+    <!-- Header / Navigation -->
+    <header class="glass sticky top-0 z-50 px-8 py-4 shadow-xl w-full">
+        <div class="w-full flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">Chief of Staff</h1>
+                    <p class="text-xs text-slate-400">העוזר האישי לניהול לוז ומשימות</p>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 shadow-inner gap-1">
+                <button onclick="switchTab('inbox')" id="btn-inbox" class="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white shadow-md">בנק משימות</button>
+                <button onclick="switchTab('daily')" id="btn-daily" class="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white">סדר יום</button>
+                <button onclick="switchTab('monthly')" id="btn-monthly" class="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white">יומן חודשי</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container - Full Width -->
+    <main class="w-full p-6 sm:p-8 flex-grow">
+
+        <!-- ==================== TAB 1: INBOX ==================== -->
+        <section id="tab-inbox" class="space-y-6 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full">
+                
+                <!-- Add Task Form (1/4 Width) -->
+                <div class="glass p-6 rounded-3xl shadow-xl lg:col-span-1 space-y-4 h-fit">
+                    <h2 class="text-lg font-bold flex items-center gap-2 text-indigo-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        הוספת משימה חדשה
+                    </h2>
+                    
+                    <form id="task-form" onsubmit="handleAddTask(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">כותרת המשימה / אירוע</label>
+                            <input type="text" id="task-title" required placeholder="למשל: שיעורי בית במתמטיקה" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">קטגוריה</label>
+                                <select id="task-category" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                                    <option value="לימודים">לימודים</option>
+                                    <option value="ספורט">ספורט</option>
+                                    <option value="פרויקטים">פרויקטים</option>
+                                    <option value="אישי">אישי</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">עדיפות</label>
+                                <select id="task-priority" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                                    <option value="high">גבוהה (דחוף)</option>
+                                    <option value="medium" selected>בינונית</option>
+                                    <option value="low">נמוכה</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">סוג משימה / חזרתיות</label>
+                            <select id="task-recurrence" onchange="toggleDateInput()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                                <option value="once">חד פעמי (תאריך מסוים)</option>
+                                <option value="daily">יומי (כל יום)</option>
+                                <option value="weekdays">ימי חול (א'-ה')</option>
+                                <option value="sun">כל יום ראשון קבוע</option>
+                                <option value="mon">כל יום שני קבוע</option>
+                                <option value="tue">כל יום שלישי קבוע</option>
+                                <option value="wed">כל יום רביעי קבוע</option>
+                                <option value="thu">כל יום חמישי קבוע</option>
+                                <option value="fri">כל יום שישי קבוע</option>
+                                <option value="sat">כל יום שבת קבוע</option>
+                            </select>
+                        </div>
+
+                        <div id="date-container">
+                            <label class="block text-xs font-medium text-slate-300 mb-1">תאריך ביצוע</label>
+                            <input type="date" id="task-date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">שעה התחלה</label>
+                                <input type="time" id="task-time" value="10:00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">שעה סיום</label>
+                                <input type="time" id="task-endtime" value="11:00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">הערות נוספות</label>
+                            <textarea id="task-notes" rows="2" placeholder="פרטים נוספים..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition-all">הוסף לבנק המשימות</button>
+                    </form>
+                </div>
+
+                <!-- Task Lists (3/4 Width) -->
+                <div class="lg:col-span-3 space-y-6">
+                    <div class="glass p-6 rounded-3xl shadow-xl">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-slate-200">משימות ממתינות וחד-פעמיות</h2>
+                            <span id="inbox-count" class="bg-slate-800 text-indigo-400 text-xs px-3 py-1 rounded-full font-semibold">0 משימות</span>
+                        </div>
+                        <div id="inbox-tasks-list" class="space-y-3 max-h-[400px] overflow-y-auto pl-2">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="glass p-6 rounded-3xl shadow-xl">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-slate-200">אירועים ופעילויות קבועות (חוגים / אימונים)</h2>
+                            <span id="recurring-count" class="bg-slate-800 text-emerald-400 text-xs px-3 py-1 rounded-full font-semibold">0 אירועים קבועים</span>
+                        </div>
+                        <div id="recurring-tasks-list" class="space-y-3 max-h-[300px] overflow-y-auto pl-2">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: DAILY SCHEDULE ==================== -->
+        <section id="tab-daily" class="space-y-6 w-full hidden">
+            <div class="glass p-6 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+                <div class="flex items-center gap-4">
+                    <button onclick="changeDay(-1)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl transition">&larr;</button>
+                    <div class="text-center">
+                        <h2 id="daily-date-title" class="text-xl font-bold text-indigo-300">היום</h2>
+                        <p id="daily-date-subtitle" class="text-xs text-slate-400">טוען תאריך...</p>
+                    </div>
+                    <button onclick="changeDay(1)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl transition">&rarr;</button>
+                </div>
+                <button onclick="jumpToToday()" class="px-4 py-2 bg-indigo-600/30 border border-indigo-500/50 hover:bg-indigo-600/50 text-indigo-300 text-sm rounded-xl transition">היום הנוכחי</button>
+            </div>
+
+            <!-- Timeline -->
+            <div class="glass p-6 rounded-3xl shadow-xl space-y-4 w-full">
+                <h3 class="text-md font-bold text-slate-200 mb-2">לוח זמנים יומי (Time Blocking)</h3>
+                <div id="timeline-container" class="space-y-3 w-full">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: MONTHLY CALENDAR ==================== -->
+        <section id="tab-monthly" class="space-y-6 w-full hidden">
+            <div class="glass p-6 rounded-3xl shadow-xl w-full">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="changeMonth(-1)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold transition">&larr; חודש קודם</button>
+                    <h2 id="month-year-title" class="text-2xl font-bold text-indigo-400">חודש</h2>
+                    <button onclick="changeMonth(1)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold transition">חודש הבא &rarr;</button>
+                </div>
+
+                <div class="grid grid-cols-7 gap-3 text-center text-xs font-bold text-slate-400 mb-2 w-full">
+                    <div>א'</div><div>ב'</div><div>ג'</div><div>ד'</div><div>ה'</div><div>ו'</div><div>ש'</div>
+                </div>
+
+                <div id="calendar-grid" class="grid grid-cols-7 gap-3 w-full">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('cos_tasks')) || [];
+        let currentTab = 'inbox';
+        let selectedDateForDaily = new Date().toISOString().split('T')[0];
+        let currentMonthDate = new Date();
+
+        function saveTasks() {
+            localStorage.setItem('cos_tasks', JSON.stringify(tasks));
+            renderAll();
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.getElementById('tab-inbox').classList.add('hidden');
+            document.getElementById('tab-daily').classList.add('hidden');
+            document.getElementById('tab-monthly').classList.add('hidden');
+
+            document.getElementById('btn-inbox').className = "px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white";
+            document.getElementById('btn-daily').className = "px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white";
+            document.getElementById('btn-monthly').className = "px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white";
+
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).className = "px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white shadow-md";
+
+            renderAll();
+        }
+
+        function toggleDateInput() {
+            const rec = document.getElementById('task-recurrence').value;
+            const dateContainer = document.getElementById('date-container');
+            if (rec === 'once') {
+                dateContainer.style.display = 'block';
+            } else {
+                dateContainer.style.display = 'none';
+            }
+        }
+
+        function handleAddTask(e) {
+            e.preventDefault();
+            const newTask = {
+                id: Date.now().toString(),
+                title: document.getElementById('task-title').value,
+                category: document.getElementById('task-category').value,
+                priority: document.getElementById('task-priority').value,
+                recurrence: document.getElementById('task-recurrence').value,
+                date: document.getElementById('task-date').value || new Date().toISOString().split('T')[0],
+                time: document.getElementById('task-time').value || '10:00',
+                endTime: document.getElementById('task-endtime').value || '11:00',
+                notes: document.getElementById('task-notes').value,
+                completed: false
+            };
+
+            tasks.push(newTask);
+            saveTasks();
+            document.getElementById('task-form').reset();
+            document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
+            toggleDateInput();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+        }
+
+        function toggleTaskComplete(id) {
+            tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t);
+            saveTasks();
+        }
+
+        function doesTaskMatchDate(task, dateStr) {
+            if (task.recurrence === 'once') {
+                return task.date === dateStr;
+            }
+            if (task.recurrence === 'daily') {
+                return true;
+            }
+            const d = new Date(dateStr);
+            const dayOfWeek = d.getDay();
+            const dayMap = {0: 'sun', 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat'};
+            
+            if (task.recurrence === 'weekdays') {
+                return dayOfWeek >= 0 && dayOfWeek <= 4;
+            }
+            return task.recurrence === dayMap[dayOfWeek];
+        }
+
+        function renderAll() {
+            renderInbox();
+            renderDaily();
+            renderMonthly();
+        }
+
+        function renderInbox() {
+            const inboxList = document.getElementById('inbox-tasks-list');
+            const recurringList = document.getElementById('recurring-tasks-list');
+            
+            const onceTasks = tasks.filter(t => t.recurrence === 'once');
+            const recTasks = tasks.filter(t => t.recurrence !== 'once');
+
+            document.getElementById('inbox-count').innerText = `${onceTasks.length} משימות`;
+            document.getElementById('recurring-count').innerText = `${recTasks.length} אירועים קבועים`;
+
+            inboxList.innerHTML = onceTasks.length === 0 ? '<p class="text-xs text-slate-500 py-4">אין משימות חד-פעמיות כרגע.</p>' : onceTasks.map(t => `
+                <div class="glass-card p-4 rounded-2xl flex justify-between items-center gap-3 w-full">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-semibold">${t.category}</span>
+                            <h4 class="font-bold text-sm ${t.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${t.title}</h4>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">📅 ${t.date} | ⏰ ${t.time} - ${t.endTime}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleTaskComplete('${t.id}')" class="px-3 py-1.5 rounded-xl text-xs font-semibold ${t.completed ? 'bg-emerald-600/30 text-emerald-300' : 'bg-slate-800 text-slate-300'}">
+                            ${t.completed ? 'בוצע ✓' : 'סמן כבוצע'}
+                        </button>
+                        <button onclick="deleteTask('${t.id}')" class="p-1.5 bg-rose-500/20 text-rose-400 rounded-xl hover:bg-rose-500/30">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+
+            recurringList.innerHTML = recTasks.length === 0 ? '<p class="text-xs text-slate-500 py-4">אין אירועים קבועים. הוסף חוגים או אימונים שחוזרים מדי שבוע.</p>' : recTasks.map(t => `
+                <div class="glass-card p-4 rounded-2xl flex justify-between items-center gap-3 w-full">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-semibold">${getRecurrenceLabel(t.recurrence)}</span>
+                            <h4 class="font-bold text-sm text-slate-200">${t.title}</h4>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">⏰ ${t.time} - ${t.endTime} | ${t.category}</p>
+                    </div>
+                    <button onclick="deleteTask('${t.id}')" class="p-1.5 bg-rose-500/20 text-rose-400 rounded-xl hover:bg-rose-500/30">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function getRecurrenceLabel(rec) {
+            const map = {
+                'daily': 'כל יום',
+                'weekdays': 'ימי חול (א\'-ה\')',
+                'sun': 'כל ראשון',
+                'mon': 'כל שני',
+                'tue': 'כל שלישי',
+                'wed': 'כל רביעי',
+                'thu': 'כל חמישי',
+                'fri': 'כל שישי',
+                'sat': 'כל שבת'
+            };
+            return map[rec] || rec;
+        }
+
+        function renderDaily() {
+            const dateTitle = document.getElementById('daily-date-title');
+            const dateSubtitle = document.getElementById('daily-date-subtitle');
+            const timelineContainer = document.getElementById('timeline-container');
+
+            dateTitle.innerText = selectedDateForDaily === new Date().toISOString().split('T')[0] ? 'היום (סדר יום)' : selectedDateForDaily;
+            dateSubtitle.innerText = new Date(selectedDateForDaily).toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            const dayTasks = tasks.filter(t => doesTaskMatchDate(t, selectedDateForDaily));
+            dayTasks.sort((a,b) => a.time.localeCompare(b.time));
+
+            const hours = [];
+            for (let h = 6; h <= 23; h++) {
+                hours.push(h < 10 ? `0${h}:00` : `${h}:00`);
+            }
+
+            timelineContainer.innerHTML = hours.map(hour => {
+                const matchingTasks = dayTasks.filter(t => t.time.startsWith(hour.substring(0, 2)));
+                return `
+                    <div class="flex gap-4 items-start border-b border-slate-800/60 pb-3 w-full">
+                        <div class="w-16 text-xs font-bold text-indigo-400 pt-1">${hour}</div>
+                        <div class="flex-grow space-y-2">
+                            ${matchingTasks.length === 0 ? '<div class="text-xs text-slate-600 py-1">פנוי</div>' : matchingTasks.map(t => `
+                                <div class="glass-card p-3 rounded-2xl flex justify-between items-center bg-slate-900/80 border-l-4 ${t.recurrence !== 'once' ? 'border-l-emerald-500' : 'border-l-indigo-500'} w-full">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-bold text-slate-200">${t.title}</span>
+                                            <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">${t.time} - ${t.endTime}</span>
+                                        </div>
+                                        ${t.notes ? `<p class="text-xs text-slate-400 mt-0.5">${t.notes}</p>` : ''}
+                                    </div>
+                                    <button onclick="toggleTaskComplete('${t.id}')" class="text-xs px-2.5 py-1 rounded-xl ${t.completed ? 'bg-emerald-600/30 text-emerald-300' : 'bg-slate-800 text-slate-300'}">
+                                        ${t.completed ? 'בוצע ✓' : 'בצע'}
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function changeDay(delta) {
+            const d = new Date(selectedDateForDaily);
+            d.setDate(d.getDate() + delta);
+            selectedDateForDaily = d.toISOString().split('T')[0];
+            renderDaily();
+        }
+
+        function jumpToToday() {
+            selectedDateForDaily = new Date().toISOString().split('T')[0];
+            renderDaily();
+        }
+
+        function renderMonthly() {
+            const grid = document.getElementById('calendar-grid');
+            const title = document.getElementById('month-year-title');
+
+            const year = currentMonthDate.getFullYear();
+            const month = currentMonthDate.getMonth();
+
+            title.innerText = currentMonthDate.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            let html = '';
+            
+            for (let i = 0; i < firstDayIndex; i++) {
+                html += `<div class="h-32 bg-slate-900/20 rounded-2xl border border-slate-900"></div>`;
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayTasks = tasks.filter(t => doesTaskMatchDate(t, dateStr));
+                const isToday = dateStr === new Date().toISOString().split('T')[0];
+
+                html += `
+                    <div onclick="openDailyForDate('${dateStr}')" class="h-32 glass-card p-3 rounded-2xl flex flex-col justify-between cursor-pointer hover:border-indigo-500/50 transition ${isToday ? 'border-indigo-500 bg-indigo-950/20' : ''}">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold ${isToday ? 'bg-indigo-600 text-white px-2 py-0.5 rounded-md' : 'text-slate-300'}">${day}</span>
+                            ${dayTasks.length > 0 ? `<span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-bold">${dayTasks.length}</span>` : ''}
+                        </div>
+                        <div class="space-y-1 overflow-y-hidden max-h-20">
+                            ${dayTasks.slice(0, 3).map(t => `<div class="text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded truncate">📍 ${t.title}</div>`).join('')}
+                            ${dayTasks.length > 3 ? `<div class="text-[10px] text-slate-500 font-semibold">+עוד ${dayTasks.length - 3}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function changeMonth(delta) {
+            currentMonthDate.setMonth(currentMonthDate.getMonth() + delta);
+            renderMonthly();
+        }
+
+        function openDailyForDate(dateStr) {
+            selectedDateForDaily = dateStr;
+            switchTab('daily');
+        }
+
+        document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
+        renderAll();
+    </script>
+</body>
+</html>
