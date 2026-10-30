@@ -1,0 +1,12 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Chief of Staff",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Chief of Staff",
+  "start_url": "./index.html",
+  "theme_color": "#ffffff",
+  "description": "יומן תזכורות"
+}
