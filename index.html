@@ -27,9 +27,9 @@
                 </div>
             </div>
             
-            <!-- Notification Permission Banner / Button -->
+            <!-- Notification Permission Button -->
             <div id="notif-banner" class="flex items-center gap-2 bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl">
-                <span class="text-xs text-slate-300">🔔 התראות דפדפן:</span>
+                <span class="text-xs text-slate-300">🔔 התראות טלפון:</span>
                 <button onclick="requestNotificationPermission()" id="notif-btn" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1 rounded-lg transition">הפעל התראות</button>
             </div>
 
@@ -231,17 +231,13 @@
 
                 const [taskHour, taskMin] = t.time.split(':').map(Number);
                 const taskStartMinutes = taskHour * 60 + taskMin;
-                
-                // Diff in minutes
                 const diff = taskStartMinutes - currentMinutes;
 
-                // Unique key for today's notification
                 const notifKey = `${t.id}_${todayStr}`;
 
-                // Trigger notification exactly when diff is between 50 to 60 minutes (1 hour before)
                 if (diff >= 50 && diff <= 60 && !notifiedTaskIds[notifKey]) {
-                    new Notification(`⏰ תזכורת: ${t.title}`, {
-                        body: `המשימה מתוכננת בעוד כ-שעה (בשעה ${t.time})`,
+                    new Notification(`⏰ תזכורת למשימה: ${t.title}`, {
+                        body: `המשימה מתחילה בעוד כ-שעה (בשעה ${t.time})`,
                         icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png'
                     });
                     notifiedTaskIds[notifKey] = true;
@@ -250,7 +246,6 @@
             });
         }
 
-        // Check every 30 seconds
         setInterval(checkForUpcomingTasks, 30000);
 
         // --- APP LOGIC ---
@@ -360,7 +355,7 @@
                 </div>
             `).join('');
 
-            recurringList.innerHTML = recTasks.length === 0 ? '<p class="text-xs text-slate-500 py-4">אין אירועים קבועים. הוסף חוגים או אימונים שחוזרים מדי שבוע.</p>' : recTasks.map(t => `
+            recurringList.innerHTML = recTasks.length === 0 ? '<p class="text-xs text-slate-500 py-4">אין אירועים קבועים.</p>' : recTasks.map(t => `
                 <div class="glass-card p-4 rounded-2xl flex justify-between items-center gap-3 w-full">
                     <div>
                         <div class="flex items-center gap-2">
