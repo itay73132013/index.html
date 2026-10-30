@@ -27,6 +27,12 @@
                 </div>
             </div>
             
+            <!-- Notification Permission Banner / Button -->
+            <div id="notif-banner" class="flex items-center gap-2 bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl">
+                <span class="text-xs text-slate-300">🔔 התראות דפדפן:</span>
+                <button onclick="requestNotificationPermission()" id="notif-btn" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1 rounded-lg transition">הפעל התראות</button>
+            </div>
+
             <!-- Navigation Tabs -->
             <nav class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 shadow-inner gap-1">
                 <button onclick="switchTab('inbox')" id="btn-inbox" class="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white shadow-md">בנק משימות</button>
@@ -36,14 +42,14 @@
         </div>
     </header>
 
-    <!-- Main Container - Full Width -->
+    <!-- Main Container -->
     <main class="w-full p-6 sm:p-8 flex-grow">
 
-        <!-- ==================== TAB 1: INBOX ==================== -->
+        <!-- TAB 1: INBOX -->
         <section id="tab-inbox" class="space-y-6 w-full">
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full">
                 
-                <!-- Add Task Form (1/4 Width) -->
+                <!-- Add Task Form -->
                 <div class="glass p-6 rounded-3xl shadow-xl lg:col-span-1 space-y-4 h-fit">
                     <h2 class="text-lg font-bold flex items-center gap-2 text-indigo-400">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
@@ -117,16 +123,14 @@
                     </form>
                 </div>
 
-                <!-- Task Lists (3/4 Width) -->
+                <!-- Task Lists -->
                 <div class="lg:col-span-3 space-y-6">
                     <div class="glass p-6 rounded-3xl shadow-xl">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-lg font-bold text-slate-200">משימות ממתינות וחד-פעמיות</h2>
                             <span id="inbox-count" class="bg-slate-800 text-indigo-400 text-xs px-3 py-1 rounded-full font-semibold">0 משימות</span>
                         </div>
-                        <div id="inbox-tasks-list" class="space-y-3 max-h-[400px] overflow-y-auto pl-2">
-                            <!-- Populated by JS -->
-                        </div>
+                        <div id="inbox-tasks-list" class="space-y-3 max-h-[400px] overflow-y-auto pl-2"></div>
                     </div>
 
                     <div class="glass p-6 rounded-3xl shadow-xl">
@@ -134,16 +138,14 @@
                             <h2 class="text-lg font-bold text-slate-200">אירועים ופעילויות קבועות (חוגים / אימונים)</h2>
                             <span id="recurring-count" class="bg-slate-800 text-emerald-400 text-xs px-3 py-1 rounded-full font-semibold">0 אירועים קבועים</span>
                         </div>
-                        <div id="recurring-tasks-list" class="space-y-3 max-h-[300px] overflow-y-auto pl-2">
-                            <!-- Populated by JS -->
-                        </div>
+                        <div id="recurring-tasks-list" class="space-y-3 max-h-[300px] overflow-y-auto pl-2"></div>
                     </div>
                 </div>
 
             </div>
         </section>
 
-        <!-- ==================== TAB 2: DAILY SCHEDULE ==================== -->
+        <!-- TAB 2: DAILY SCHEDULE -->
         <section id="tab-daily" class="space-y-6 w-full hidden">
             <div class="glass p-6 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
                 <div class="flex items-center gap-4">
@@ -157,16 +159,13 @@
                 <button onclick="jumpToToday()" class="px-4 py-2 bg-indigo-600/30 border border-indigo-500/50 hover:bg-indigo-600/50 text-indigo-300 text-sm rounded-xl transition">היום הנוכחי</button>
             </div>
 
-            <!-- Timeline -->
             <div class="glass p-6 rounded-3xl shadow-xl space-y-4 w-full">
                 <h3 class="text-md font-bold text-slate-200 mb-2">לוח זמנים יומי (Time Blocking)</h3>
-                <div id="timeline-container" class="space-y-3 w-full">
-                    <!-- Populated by JS -->
-                </div>
+                <div id="timeline-container" class="space-y-3 w-full"></div>
             </div>
         </section>
 
-        <!-- ==================== TAB 3: MONTHLY CALENDAR ==================== -->
+        <!-- TAB 3: MONTHLY CALENDAR -->
         <section id="tab-monthly" class="space-y-6 w-full hidden">
             <div class="glass p-6 rounded-3xl shadow-xl w-full">
                 <div class="flex justify-between items-center mb-6">
@@ -179,9 +178,7 @@
                     <div>א'</div><div>ב'</div><div>ג'</div><div>ד'</div><div>ה'</div><div>ו'</div><div>ש'</div>
                 </div>
 
-                <div id="calendar-grid" class="grid grid-cols-7 gap-3 w-full">
-                    <!-- Populated by JS -->
-                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-3 w-full"></div>
             </div>
         </section>
 
@@ -189,10 +186,74 @@
 
     <script>
         let tasks = JSON.parse(localStorage.getItem('cos_tasks')) || [];
+        let notifiedTaskIds = JSON.parse(localStorage.getItem('cos_notified')) || {};
         let currentTab = 'inbox';
         let selectedDateForDaily = new Date().toISOString().split('T')[0];
         let currentMonthDate = new Date();
 
+        // --- NOTIFICATION ENGINE ---
+        function checkNotificationStatus() {
+            const btn = document.getElementById('notif-btn');
+            if (!("Notification" in window)) {
+                document.getElementById('notif-banner').innerHTML = '<span class="text-xs text-rose-400">הדפדפן לא תומך בהתראות</span>';
+                return;
+            }
+            if (Notification.permission === "granted") {
+                btn.className = "text-xs bg-emerald-600 text-white font-bold px-3 py-1 rounded-lg cursor-default";
+                btn.innerText = "התראות פעילות ✓";
+            } else if (Notification.permission === "denied") {
+                btn.className = "text-xs bg-rose-600 text-white font-bold px-3 py-1 rounded-lg cursor-default";
+                btn.innerText = "התראות חסומות";
+            }
+        }
+
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then(permission => {
+                    checkNotificationStatus();
+                    if(permission === 'granted') {
+                        new Notification("Chief of Staff", { body: "ההתראות הופעלו בהצלחה! תקבל תזכורת שעה לפני כל משימה." });
+                    }
+                });
+            }
+        }
+
+        function checkForUpcomingTasks() {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+            tasks.forEach(t => {
+                if (t.completed) return;
+                if (!doesTaskMatchDate(t, todayStr)) return;
+
+                const [taskHour, taskMin] = t.time.split(':').map(Number);
+                const taskStartMinutes = taskHour * 60 + taskMin;
+                
+                // Diff in minutes
+                const diff = taskStartMinutes - currentMinutes;
+
+                // Unique key for today's notification
+                const notifKey = `${t.id}_${todayStr}`;
+
+                // Trigger notification exactly when diff is between 50 to 60 minutes (1 hour before)
+                if (diff >= 50 && diff <= 60 && !notifiedTaskIds[notifKey]) {
+                    new Notification(`⏰ תזכורת: ${t.title}`, {
+                        body: `המשימה מתוכננת בעוד כ-שעה (בשעה ${t.time})`,
+                        icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png'
+                    });
+                    notifiedTaskIds[notifKey] = true;
+                    localStorage.setItem('cos_notified', JSON.stringify(notifiedTaskIds));
+                }
+            });
+        }
+
+        // Check every 30 seconds
+        setInterval(checkForUpcomingTasks, 30000);
+
+        // --- APP LOGIC ---
         function saveTasks() {
             localStorage.setItem('cos_tasks', JSON.stringify(tasks));
             renderAll();
@@ -217,11 +278,7 @@
         function toggleDateInput() {
             const rec = document.getElementById('task-recurrence').value;
             const dateContainer = document.getElementById('date-container');
-            if (rec === 'once') {
-                dateContainer.style.display = 'block';
-            } else {
-                dateContainer.style.display = 'none';
-            }
+            dateContainer.style.display = (rec === 'once') ? 'block' : 'none';
         }
 
         function handleAddTask(e) {
@@ -244,6 +301,7 @@
             document.getElementById('task-form').reset();
             document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
             toggleDateInput();
+            checkForUpcomingTasks();
         }
 
         function deleteTask(id) {
@@ -257,19 +315,14 @@
         }
 
         function doesTaskMatchDate(task, dateStr) {
-            if (task.recurrence === 'once') {
-                return task.date === dateStr;
-            }
-            if (task.recurrence === 'daily') {
-                return true;
-            }
+            if (task.recurrence === 'once') return task.date === dateStr;
+            if (task.recurrence === 'daily') return true;
+            
             const d = new Date(dateStr);
             const dayOfWeek = d.getDay();
             const dayMap = {0: 'sun', 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat'};
             
-            if (task.recurrence === 'weekdays') {
-                return dayOfWeek >= 0 && dayOfWeek <= 4;
-            }
+            if (task.recurrence === 'weekdays') return dayOfWeek >= 0 && dayOfWeek <= 4;
             return task.recurrence === dayMap[dayOfWeek];
         }
 
@@ -322,17 +375,7 @@
         }
 
         function getRecurrenceLabel(rec) {
-            const map = {
-                'daily': 'כל יום',
-                'weekdays': 'ימי חול (א\'-ה\')',
-                'sun': 'כל ראשון',
-                'mon': 'כל שני',
-                'tue': 'כל שלישי',
-                'wed': 'כל רביעי',
-                'thu': 'כל חמישי',
-                'fri': 'כל שישי',
-                'sat': 'כל שבת'
-            };
+            const map = { 'daily': 'כל יום', 'weekdays': 'ימי חול (א\'-ה\')', 'sun': 'כל ראשון', 'mon': 'כל שני', 'tue': 'כל שלישי', 'wed': 'כל רביעי', 'thu': 'כל חמישי', 'fri': 'כל שישי', 'sat': 'כל שבת' };
             return map[rec] || rec;
         }
 
@@ -348,9 +391,7 @@
             dayTasks.sort((a,b) => a.time.localeCompare(b.time));
 
             const hours = [];
-            for (let h = 6; h <= 23; h++) {
-                hours.push(h < 10 ? `0${h}:00` : `${h}:00`);
-            }
+            for (let h = 6; h <= 23; h++) hours.push(h < 10 ? `0${h}:00` : `${h}:00`);
 
             timelineContainer.innerHTML = hours.map(hour => {
                 const matchingTasks = dayTasks.filter(t => t.time.startsWith(hour.substring(0, 2)));
@@ -403,10 +444,7 @@
             const totalDays = new Date(year, month + 1, 0).getDate();
 
             let html = '';
-            
-            for (let i = 0; i < firstDayIndex; i++) {
-                html += `<div class="h-32 bg-slate-900/20 rounded-2xl border border-slate-900"></div>`;
-            }
+            for (let i = 0; i < firstDayIndex; i++) html += `<div class="h-32 bg-slate-900/20 rounded-2xl border border-slate-900"></div>`;
 
             for (let day = 1; day <= totalDays; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -440,8 +478,11 @@
             switchTab('daily');
         }
 
+        // Init
         document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
+        checkNotificationStatus();
         renderAll();
+        checkForUpcomingTasks();
     </script>
 </body>
 </html>
